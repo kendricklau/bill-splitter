@@ -5,7 +5,7 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
   
     formData.append('file', fileField.files[0]);
   
-    fetch('https://your-render-app-url.onrender.com/upload', {
+    fetch('https://bill-splitter-5l4m.onrender.com', {
       method: 'POST',
       body: formData
     })
