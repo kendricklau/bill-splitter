@@ -1,17 +1,20 @@
 import os
-from flask import Flask, request, jsonify, send_from_directory
-from werkzeug.utils import secure_filename
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pytesseract
 from PIL import Image
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
+CORS(app)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.makedirs(app.config['UPLOAD_FOLDER'])
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
 
 def extract_text_from_image(image_path):
     try:
-        text = pytesseract.image_to_string(Image.open(image_path))
+        text = pytesseract.image_to_string(image_path)
         return text
     except Exception as e:
         print(f"Error reading image: {e}")
@@ -32,7 +35,6 @@ def parse_receipt(text):
             parts = line.rsplit('$', 1)
             item_name = parts[0].strip().lower()
             item_price = parts[1].strip()
-            # Check for tax, tip, and service charges
             if "tax" in item_name:
                 tax = float(item_price)
                 continue
@@ -50,6 +52,27 @@ def parse_receipt(text):
             buffer = line.strip()
     return items, tax, tip_and_service_charge
 
+def calculate_owed_amount(dishes_per_person, items, tax, tip_and_service_charge, payer_name):
+    amounts_owed = {}
+
+    for person in dishes_per_person:
+        amounts_owed[person] = 0.0
+
+    total_items_cost = sum(float(price) for price in items.values())
+
+    for dish, price in items.items():
+        people_who_had_dish = [person for person in dishes_per_person if dish in dishes_per_person[person]]
+        share = float(price) / len(people_who_had_dish)
+        for person in people_who_had_dish:
+            amounts_owed[person] += share
+
+    total_extra = float(tax) + float(tip_and_service_charge)
+    for person in amounts_owed:
+        person_share = amounts_owed[person] / total_items_cost
+        amounts_owed[person] += person_share * total_extra
+
+    return amounts_owed
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
@@ -57,16 +80,13 @@ def upload_file():
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
-    if file:
+    if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
         text = extract_text_from_image(filepath)
-        if text:
-            items, tax, tip_and_service_charge = parse_receipt(text)
-            return jsonify({'items': items, 'tax': tax, 'tip': tip_and_service_charge})
-        else:
-            return jsonify({'error': 'Failed to extract text from image'}), 500
+        items, tax, tip_and_service_charge = parse_receipt(text)
+        return jsonify({'items': items, 'tax': tax, 'tip': tip_and_service_charge})
 
 @app.route('/calculate', methods=['POST'])
 def calculate():
@@ -77,33 +97,4 @@ def calculate():
     payer_name = data['payer_name']
     dishes_per_person = data['dishes_per_person']
 
-    amounts_owed = calculate_owed_amount(dishes_per_person, items, tax, tip, payer_name)
-
-    return jsonify(amounts_owed)
-
-def calculate_owed_amount(dishes_per_person, items, tax, tip, payer_name):
-    amounts_owed = {}
-
-    # Initialize owed amounts to zero
-    for person in dishes_per_person:
-        amounts_owed[person] = 0.0
-
-    total_items_cost = sum(float(price) for price in items.values())
-
-    # Calculate each person's share for each dish
-    for dish, price in items.items():
-        people_who_had_dish = [person for person in dishes_per_person if dish in dishes_per_person[person]]
-        share = float(price) / len(people_who_had_dish)
-        for person in people_who_had_dish:
-            amounts_owed[person] += share
-
-    # Calculate the total tax and tip share for each person
-    total_extra = float(tax) + float(tip)
-    for person in amounts_owed:
-        person_share = amounts_owed[person] / total_items_cost
-        amounts_owed[person] += person_share * total_extra
-
-    return amounts_owed
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    amounts_owed = calculate_owed_amount(dishes_per_person,​⬤
