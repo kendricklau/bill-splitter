@@ -49,7 +49,7 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
           }
         }
   
-        fetch('https://your-render-app-url.onrender.com/calculate', {
+        fetch('https://bill-splitter-5l4m.onrender.com/calculate', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
