@@ -22,10 +22,10 @@ def extract_text_from_image(image_path):
     try:
         print(f"Extracting text from image: {image_path}")
         sys.stdout.flush()
-        image = Image.open(image_path)
+        # image = Image.open(image_path)
         print("Image opened successfully.")
         sys.stdout.flush()
-        text = pytesseract.image_to_string(image)
+        text = pytesseract.image_to_string(image_path)
         print(f"Extracted text: {text}")
         sys.stdout.flush()
         return text
