@@ -106,4 +106,4 @@ def calculate_owed_amount(dishes_per_person, items, tax, tip, payer_name):
     return amounts_owed
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')
