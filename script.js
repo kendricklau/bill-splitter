@@ -5,12 +5,15 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
 
   formData.append('file', fileField.files[0]);
 
+  console.log('Uploading file:', fileField.files[0]);
+
   fetch('https://bill-splitter-docker.onrender.com/upload', {
     method: 'POST',
     body: formData
   })
   .then(response => response.json())
   .then(data => {
+    console.log('Upload response data:', data);
     const dishForm = document.getElementById('dish-form');
     const dishesDiv = document.getElementById('dishes');
     dishesDiv.innerHTML = '';
@@ -18,7 +21,7 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
 
     for (let dish in data.items) {
       const dishDiv = document.createElement('div');
-      dishDiv.innerHTML = '<label>${dish} ($${data.items[dish]}):</label><br>';
+      dishDiv.innerHTML = `<label>${dish} ($${data.items[dish]}):</label><br>`;
       const peopleInput = document.createElement('input');
       peopleInput.type = 'text';
       peopleInput.name = dish;
@@ -36,6 +39,8 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
       const payerName = document.getElementById('payer_name').value;
       const numPeople = document.getElementById('num_people').value;
 
+      console.log('Form data:', { items, tax, tip, payerName, numPeople });
+
       const dishesPerPerson = {};
       const inputs = dishesDiv.getElementsByTagName('input');
       for (let input of inputs) {
@@ -49,6 +54,8 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
         }
       }
 
+      console.log('Dishes per person:', dishesPerPerson);
+
       fetch('https://bill-splitter-docker.onrender.com/calculate', {
         method: 'POST',
         headers: {
@@ -58,12 +65,16 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
       })
       .then(response => response.json())
       .then(data => {
+        console.log('Calculate response data:', data);
         const resultsDiv = document.getElementById('results');
         resultsDiv.innerHTML = '<h2>Amounts Owed:</h2>';
         for (let person in data) {
-          resultsDiv.innerHTML += '<p>${person}: $${data[person].toFixed(2)}</p>';
+          resultsDiv.innerHTML += `<p>${person}: $${data[person].toFixed(2)}</p>`;
         }
       });
     });
+  })
+  .catch(error => {
+    console.error('Error:', error);
   });
 });

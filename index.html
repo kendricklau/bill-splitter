@@ -3,51 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <title>Receipt Splitter</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    h1 {
-      color: #333;
-    }
-    form {
-      margin-top: 20px;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-    }
-    input[type="text"], input[type="number"], input[type="file"] {
-      margin-top: 5px;
-      margin-bottom: 15px;
-    }
-    input[type="submit"] {
-      margin-top: 15px;
-    }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <h1>Upload Receipt</h1>
-  <form id="upload-form" enctype="multipart/form-data">
-    <label for="file">Choose a file:</label>
-    <input type="file" id="file" name="file"><br>
+  <h1>Receipt Splitter</h1>
+  <form id="upload-form">
+    <label for="file">Upload Receipt:</label>
+    <input type="file" id="file" name="file" accept="image/*"><br>
     <input type="submit" value="Upload">
   </form>
-  <div id="items-section" style="display:none;">
-    <h2>Select who had each dish</h2>
-    <form id="items-form">
-      <div id="items-list"></div>
-      <label for="payer_name">Name of the person who paid:</label>
-      <input type="text" id="payer_name" name="payer_name"><br><br>
-      <label for="tax">Tax:</label>
-      <input type="text" id="tax" name="tax"><br>
-      <label for="tip">Tip:</label>
-      <input type="text" id="tip" name="tip"><br>
-      <label for="people">People (comma separated):</label>
-      <input type="text" id="people" name="people"><br>
-      <input type="submit" value="Calculate">
-    </form>
+  <div id="dish-form" style="display:none;">
+    <label for="payer_name">Name of the person who paid:</label>
+    <input type="text" id="payer_name" name="payer_name"><br><br>
+    <label for="num_people">Number of people (including the payer):</label>
+    <input type="number" id="num_people" name="num_people"><br><br>
+    <div id="dishes"></div>
+    <input type="submit" value="Calculate" onclick="calculateAmounts()">
   </div>
   <div id="results"></div>
   <script src="script.js"></script>
