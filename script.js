@@ -5,7 +5,7 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
 
   formData.append('file', fileField.files[0]);
 
-  fetch('https://bill-splitter-5l4m.onrender.com/upload', {
+  fetch('https://bill-splitter-5l4m.onrender.com:5000/upload', {
     method: 'POST',
     body: formData
   })
@@ -49,7 +49,7 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
         }
       }
 
-      fetch('https://bill-splitter-5l4m.onrender.com/calculate', {
+      fetch('https://bill-splitter-5l4m.onrender.com:5000/calculate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
