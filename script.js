@@ -73,6 +73,7 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
         checkbox.name = dish;
         checkbox.value = person;
         checkbox.id = `${dish}_${person}`;
+        checkbox.dataset.price = data.items[dish];
         const checkboxLabel = document.createElement('label');
         checkboxLabel.htmlFor = `${dish}_${person}`;
         checkboxLabel.innerText = person;
@@ -106,7 +107,7 @@ document.getElementById('dish-form').addEventListener('submit', function (e) {
       const person = checkbox.value;
       
       if (!items[dish]) {
-        items[dish] = parseFloat(document.querySelector(`label[for="${dish}"]`).innerText.split('$')[1]);
+        items[dish] = parseFloat(checkbox.dataset.price);
       }
       
       if (!dishesPerPerson[person]) {
