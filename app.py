@@ -1,4 +1,6 @@
 import os
+import sys
+import subprocess
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pytesseract
@@ -9,29 +11,26 @@ app = Flask(__name__)
 CORS(app)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
+# Ensure logs are flushed
+sys.stdout.flush()
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
 
 def extract_text_from_image(image_path):
     try:
-        # Log the image path
         print(f"Extracting text from image: {image_path}")
-        
-        # Open the image file
+        sys.stdout.flush()  # Ensure log is flushed
         image = Image.open(image_path)
-        
-        # Log that the image was opened successfully
         print("Image opened successfully.")
-        
-        # Perform OCR using pytesseract
+        sys.stdout.flush()  # Ensure log is flushed
         text = pytesseract.image_to_string(image)
-        
-        # Log the extracted text
         print(f"Extracted text: {text}")
-        
+        sys.stdout.flush()  # Ensure log is flushed
         return text
     except Exception as e:
         print(f"Error reading image: {e}")
+        sys.stdout.flush()  # Ensure log is flushed
         return None
 
 def parse_receipt(text):
@@ -90,12 +89,15 @@ def calculate_owed_amount(dishes_per_person, items, tax, tip_and_service_charge,
 @app.route('/upload', methods=['POST'])
 def upload_file():
     print("Received request:", request)
+    sys.stdout.flush()  # Ensure log is flushed
     if 'file' not in request.files:
         print("No file part in the request")
+        sys.stdout.flush()  # Ensure log is flushed
         return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
     if file.filename == '':
         print("No selected file")
+        sys.stdout.flush()  # Ensure log is flushed
         return jsonify({'error': 'No selected file'}), 400
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -119,6 +121,14 @@ def calculate():
     amounts_owed = calculate_owed_amount(dishes_per_person, items, tax, tip, payer_name)
 
     return jsonify(amounts_owed)
+
+@app.route('/check-tesseract', methods=['GET'])
+def check_tesseract():
+    try:
+        result = subprocess.run(['tesseract', '--version'], capture_output=True, text=True)
+        return jsonify({'tesseract_version': result.stdout})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
