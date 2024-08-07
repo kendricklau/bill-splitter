@@ -22,10 +22,23 @@ def extract_text_from_image(image_path):
     try:
         print(f"Extracting text from image: {image_path}")
         sys.stdout.flush()
-        # image = Image.open(image_path)
+        image = Image.open(image_path)
         print("Image opened successfully.")
         sys.stdout.flush()
-        text = pytesseract.image_to_string(image_path)
+        
+        # Log the image format and size
+        print(f"Image format: {image.format}, size: {image.size}")
+        sys.stdout.flush()
+        
+        # Convert image to a supported format (e.g., JPEG)
+        if image.format not in ['JPEG', 'JPG', 'PNG']:
+            image = image.convert('RGB')
+            image_path = image_path + '.jpg'
+            image.save(image_path, 'JPEG')
+            print(f"Image converted to JPEG: {image_path}")
+            sys.stdout.flush()
+        
+        text = pytesseract.image_to_string(image)
         print(f"Extracted text: {text}")
         sys.stdout.flush()
         return text
@@ -68,24 +81,37 @@ def parse_receipt(text):
 
 def calculate_owed_amount(dishes_per_person, items, tax, tip_and_service_charge, payer_name):
     amounts_owed = {}
+    breakdown = {}
+
+    total_items_cost = sum(float(price) for price in items.values())
 
     for person in dishes_per_person:
         amounts_owed[person] = 0.0
-
-    total_items_cost = sum(float(price) for price in items.values())
+        breakdown[person] = {
+            'total': 0.0,
+            'dishes': [],
+            'tax': 0.0,
+            'tip': 0.0
+        }
 
     for dish, price in items.items():
         people_who_had_dish = [person for person in dishes_per_person if dish in dishes_per_person[person]]
         share = float(price) / len(people_who_had_dish)
         for person in people_who_had_dish:
             amounts_owed[person] += share
+            breakdown[person]['dishes'].append({'name': dish, 'amount': share})
 
     total_extra = float(tax) + float(tip_and_service_charge)
     for person in amounts_owed:
         person_share = amounts_owed[person] / total_items_cost
-        amounts_owed[person] += person_share * total_extra
+        tax_share = person_share * float(tax)
+        tip_share = person_share * float(tip_and_service_charge)
+        amounts_owed[person] += tax_share + tip_share
+        breakdown[person]['total'] = amounts_owed[person]
+        breakdown[person]['tax'] = tax_share
+        breakdown[person]['tip'] = tip_share
 
-    return amounts_owed
+    return breakdown
 
 @app.route('/upload', methods=['POST'])
 def upload_file():

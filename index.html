@@ -7,19 +7,26 @@
 </head>
 <body>
   <h1>Receipt Splitter</h1>
-  <form id="upload-form">
+  <form id="initial-form">
+    <label for="payer_name">Name of the person who paid:</label>
+    <input type="text" id="payer_name" name="payer_name" required><br><br>
+    <label for="num_people">Number of people who attended (including the payer):</label>
+    <select id="num_people" name="num_people" required>
+      <option value="">Select number of people</option>
+      ${[...Array(16)].map((_, i) => `<option value="${i+1}">${i+1}</option>`).join('')}
+    </select><br><br>
+    <div id="people-names"></div>
+    <input type="submit" value="Next">
+  </form>
+  <form id="upload-form" style="display:none;">
     <label for="file">Upload Receipt:</label>
-    <input type="file" id="file" name="file" accept="image/*"><br>
+    <input type="file" id="file" name="file" accept="image/*" required><br>
     <input type="submit" value="Upload">
   </form>
-  <div id="dish-form" style="display:none;">
-    <label for="payer_name">Name of the person who paid:</label>
-    <input type="text" id="payer_name" name="payer_name"><br><br>
-    <label for="num_people">Number of people (including the payer):</label>
-    <input type="number" id="num_people" name="num_people"><br><br>
+  <form id="dish-form" style="display:none;">
     <div id="dishes"></div>
-    <input type="submit" value="Calculate" onclick="calculateAmounts(event)">
-  </div>
+    <input type="submit" value="Calculate">
+  </form>
   <div id="results"></div>
   <script src="script.js"></script>
 </body>
