@@ -85,6 +85,10 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
       
       dishesDiv.appendChild(dishDiv);
     }
+
+    // Store tax and tip data for later use
+    dishForm.dataset.tax = data.tax;
+    dishForm.dataset.tip = data.tip;
   })
   .catch(error => {
     console.error('Error:', error);
@@ -97,6 +101,7 @@ document.getElementById('dish-form').addEventListener('submit', function (e) {
   const payerName = document.getElementById('payer_name').value;
   const dishesDiv = document.getElementById('dishes');
   const checkboxes = dishesDiv.getElementsByTagName('input');
+  const dishForm = document.getElementById('dish-form');
   
   const items = {};
   const dishesPerPerson = {};
@@ -118,12 +123,15 @@ document.getElementById('dish-form').addEventListener('submit', function (e) {
     }
   }
   
+  const tax = parseFloat(dishForm.dataset.tax);
+  const tip = parseFloat(dishForm.dataset.tip);
+
   fetch('https://bill-splitter-docker.onrender.com/calculate', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ items, payer_name: payerName, dishes_per_person: dishesPerPerson })
+    body: JSON.stringify({ items, tax, tip, payer_name: payerName, dishes_per_person: dishesPerPerson })
   })
   .then(response => response.json())
   .then(data => {

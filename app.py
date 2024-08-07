@@ -145,8 +145,8 @@ def upload_file():
 def calculate():
     data = request.get_json()
     items = data['items']
-    tax = data['tax']
-    tip = data['tip']
+    tax = data.get('tax', 0.0)
+    tip = data.get('tip', 0.0)
     payer_name = data['payer_name']
     dishes_per_person = data['dishes_per_person']
 
