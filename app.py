@@ -66,7 +66,7 @@ def upload_file():
             items, tax, tip_and_service_charge = parse_receipt(text)
             return jsonify({'items': items, 'tax': tax, 'tip': tip_and_service_charge})
         else:
-            return jsonify({'error': 'Failed to extract text from image'}), 500
+            return jsonify({'error': 'Failed to extract text from image', 'filepath': request.files}), 500
 
 @app.route('/calculate', methods=['POST'])
 def calculate():
