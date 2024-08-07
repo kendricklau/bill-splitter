@@ -14,8 +14,15 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
   .then(response => response.json())
   .then(data => {
     console.log('Upload response data:', data);
+
     const dishForm = document.getElementById('dish-form');
     const dishesDiv = document.getElementById('dishes');
+    
+    if (!dishForm || !dishesDiv) {
+      console.error('Dish form or dishes div not found');
+      return;
+    }
+
     dishesDiv.innerHTML = '';
     dishForm.style.display = 'block';
 
@@ -30,7 +37,7 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
       dishesDiv.appendChild(dishDiv);
     }
 
-    document.getElementById('dish-form').addEventListener('submit', function (e) {
+    dishForm.addEventListener('submit', function (e) {
       e.preventDefault();
 
       const items = data.items;
@@ -78,3 +85,8 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
     console.error('Error:', error);
   });
 });
+
+function calculateAmounts(e) {
+  e.preventDefault();
+  // Function logic if needed
+}
