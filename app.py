@@ -6,13 +6,14 @@ from flask_cors import CORS
 import pytesseract
 from PIL import Image
 from werkzeug.utils import secure_filename
+import logging
 
 app = Flask(__name__)
 CORS(app)
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
-# Ensure logs are flushed
-sys.stdout.flush()
+# Configure logging
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
@@ -20,17 +21,17 @@ def allowed_file(filename):
 def extract_text_from_image(image_path):
     try:
         print(f"Extracting text from image: {image_path}")
-        sys.stdout.flush()  # Ensure log is flushed
+        sys.stdout.flush()
         image = Image.open(image_path)
         print("Image opened successfully.")
-        sys.stdout.flush()  # Ensure log is flushed
+        sys.stdout.flush()
         text = pytesseract.image_to_string(image)
         print(f"Extracted text: {text}")
-        sys.stdout.flush()  # Ensure log is flushed
+        sys.stdout.flush()
         return text
     except Exception as e:
         print(f"Error reading image: {e}")
-        sys.stdout.flush()  # Ensure log is flushed
+        sys.stdout.flush()
         return None
 
 def parse_receipt(text):
@@ -89,19 +90,24 @@ def calculate_owed_amount(dishes_per_person, items, tax, tip_and_service_charge,
 @app.route('/upload', methods=['POST'])
 def upload_file():
     print("Received request:", request)
-    sys.stdout.flush()  # Ensure log is flushed
+    sys.stdout.flush()
     if 'file' not in request.files:
         print("No file part in the request")
-        sys.stdout.flush()  # Ensure log is flushed
+        sys.stdout.flush()
         return jsonify({'error': 'No file part'}), 400
     file = request.files['file']
     if file.filename == '':
         print("No selected file")
-        sys.stdout.flush()  # Ensure log is flushed
+        sys.stdout.flush()
         return jsonify({'error': 'No selected file'}), 400
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Ensure the uploads directory exists
+        if not os.path.exists(app.config['UPLOAD_FOLDER']):
+            os.makedirs(app.config['UPLOAD_FOLDER'])
+        
         file.save(filepath)
         text = extract_text_from_image(filepath)
         if text is None:
