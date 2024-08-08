@@ -1,11 +1,10 @@
 document.getElementById('initial-form').addEventListener('submit', function (e) {
   e.preventDefault();
   
-  const payerName = document.getElementById('payer_name').value;
   const numPeople = document.getElementById('num_people').value;
   
-  if (!payerName || !numPeople) {
-    alert('Please enter the payer name and number of people.');
+  if (!numPeople) {
+    alert('Please select the number of people.');
     return;
   }
   
@@ -98,7 +97,6 @@ document.getElementById('upload-form').addEventListener('submit', function (e) {
 document.getElementById('dish-form').addEventListener('submit', function (e) {
   e.preventDefault();
   
-  const payerName = document.getElementById('payer_name').value;
   const dishesDiv = document.getElementById('dishes');
   const checkboxes = dishesDiv.getElementsByTagName('input');
   const dishForm = document.getElementById('dish-form');
@@ -131,7 +129,7 @@ document.getElementById('dish-form').addEventListener('submit', function (e) {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ items, tax, tip, payer_name: payerName, dishes_per_person: dishesPerPerson })
+    body: JSON.stringify({ items, tax, tip, dishes_per_person: dishesPerPerson })
   })
   .then(response => response.json())
   .then(data => {
