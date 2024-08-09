@@ -79,7 +79,7 @@ def parse_receipt(text):
             buffer = line.strip()
     return items, tax, tip_and_service_charge
 
-def calculate_owed_amount(dishes_per_person, items, tax, tip_and_service_charge, payer_name):
+def calculate_owed_amount(dishes_per_person, items, tax, tip_and_service_charge):
     amounts_owed = {}
     breakdown = {}
 
@@ -147,10 +147,9 @@ def calculate():
     items = data['items']
     tax = data.get('tax', 0.0)
     tip = data.get('tip', 0.0)
-    payer_name = data['payer_name']
     dishes_per_person = data['dishes_per_person']
 
-    amounts_owed = calculate_owed_amount(dishes_per_person, items, tax, tip, payer_name)
+    amounts_owed = calculate_owed_amount(dishes_per_person, items, tax, tip)
 
     return jsonify(amounts_owed)
 
