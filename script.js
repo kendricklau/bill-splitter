@@ -137,15 +137,24 @@ document.getElementById('dish-form').addEventListener('submit', function (e) {
     const resultsDiv = document.getElementById('results');
     resultsDiv.innerHTML = '<h2>Amounts Owed:</h2>';
     
-    for (let person in data) {
-      resultsDiv.innerHTML += `<p>${person}: $${data[person].total.toFixed(2)}</p>`;
+    for (let person in data.amounts_owed) {
+      resultsDiv.innerHTML += `<p>${person}: $${data.amounts_owed[person].total.toFixed(2)}</p>`;
       resultsDiv.innerHTML += '<ul>';
-      data[person].dishes.forEach(dish => {
+      data.amounts_owed[person].dishes.forEach(dish => {
         resultsDiv.innerHTML += `<li>${dish.name}: $${dish.amount.toFixed(2)}</li>`;
       });
-      resultsDiv.innerHTML += `<li>Tax: $${data[person].tax.toFixed(2)}</li>`;
-      resultsDiv.innerHTML += `<li>Tip: $${data[person].tip.toFixed(2)}</li>`;
+      resultsDiv.innerHTML += `<li>Tax: $${data.amounts_owed[person].tax.toFixed(2)}</li>`;
+      resultsDiv.innerHTML += `<li>Tip: $${data.amounts_owed[person].tip.toFixed(2)}</li>`;
       resultsDiv.innerHTML += '</ul>';
     }
+
+    resultsDiv.innerHTML += '<h2>Detailed Breakdown:</h2>';
+    for (let dish in data.detailed_breakdown) {
+      const breakdown = data.detailed_breakdown[dish];
+      resultsDiv.innerHTML += `<p>${dish}: $${breakdown.price.toFixed(2)} split by ${breakdown.num_people} people, $${breakdown.share_per_person.toFixed(2)} each</p>`;
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
   });
 });

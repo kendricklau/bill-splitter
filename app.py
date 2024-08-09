@@ -82,6 +82,7 @@ def parse_receipt(text):
 def calculate_owed_amount(dishes_per_person, items, tax, tip_and_service_charge):
     amounts_owed = {}
     breakdown = {}
+    detailed_breakdown = {}
 
     total_items_cost = sum(float(price) for price in items.values())
 
@@ -97,6 +98,12 @@ def calculate_owed_amount(dishes_per_person, items, tax, tip_and_service_charge)
     for dish, price in items.items():
         people_who_had_dish = [person for person in dishes_per_person if dish in dishes_per_person[person]]
         share = float(price) / len(people_who_had_dish)
+        detailed_breakdown[dish] = {
+            'price': price,
+            'num_people': len(people_who_had_dish),
+            'share_per_person': share,
+            'people': people_who_had_dish
+        }
         for person in people_who_had_dish:
             amounts_owed[person] += share
             breakdown[person]['dishes'].append({'name': dish, 'amount': share})
@@ -111,7 +118,7 @@ def calculate_owed_amount(dishes_per_person, items, tax, tip_and_service_charge)
         breakdown[person]['tax'] = tax_share
         breakdown[person]['tip'] = tip_share
 
-    return breakdown
+    return breakdown, detailed_breakdown
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -149,9 +156,9 @@ def calculate():
     tip = data.get('tip', 0.0)
     dishes_per_person = data['dishes_per_person']
 
-    amounts_owed = calculate_owed_amount(dishes_per_person, items, tax, tip)
+    amounts_owed, detailed_breakdown = calculate_owed_amount(dishes_per_person, items, tax, tip)
 
-    return jsonify(amounts_owed)
+    return jsonify({'amounts_owed': amounts_owed, 'detailed_breakdown': detailed_breakdown})
 
 @app.route('/check-tesseract', methods=['GET'])
 def check_tesseract():
